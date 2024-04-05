@@ -45,7 +45,7 @@ public class JobNameIdentifier {
 		jobAndLogName.put( "ReprocessFailedRecordsJob" , "ASCS_DAILY_REPROCESS_FAILED_RECORDS");
 		jobAndLogName.put( "CustomPointHandShakeEmailJob" , "SBO_DAILY_CP_LETTER_LOAD_PROD");
 		jobAndLogName.put( "AgentWelcomeLetterJob" , "ASCS_DAILY_AGENT_SETUP_WELCOM_LETTER_PROCESS_LOAD");
-
+		jobAndLogName.put("ReconReportJob", "ASCS_DAILY_RECON_REPORT_PROCESS_LOAD");
 		return jobAndLogName;
 	}
 

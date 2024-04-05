@@ -7,7 +7,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Scanner;
 import java.util.TimeZone;
 
 import org.apache.poi.ss.usermodel.BorderStyle;
@@ -39,8 +38,7 @@ public class JobTimingsFiller {
 			int sh1Len = sh1.getLastRowNum();
 			int sh2Len = sh2.getLastRowNum();
 			System.out.printf("%d, %d\n", sh1Len, sh2Len);
-			Cell scheduleCell = null;
-			String schedule = "", splitter = null;
+			String splitter = null;
 			int[] flag = new int[sh2Len + 1];
 			String[] unmatchedJobs = new String[15];
 			int cntr = 0;
@@ -129,10 +127,14 @@ public class JobTimingsFiller {
 								default:
 									break;
 								}
-								String srvr = fm.formatCellValue(sh2.getRow(j).getCell(5));
+								//String srvr = fm.formatCellValue(sh2.getRow(j).getCell(5));
 
-								if (startDate.equals("") && endDate.equals(""))
+								if (startDate.equals("") && endDate.equals("")) {
 									cellJobStatus.setCellValue("Yet to start");
+									XSSFCell deletionStatusCell = sh1.getRow(i).getCell(26);
+									String deletionStatus = "-"+fm.formatCellValue(deletionStatusCell)+"-";
+									System.out.println(deletionStatus);
+								}
 								System.out.printf("%d) %s - %s%n", (i + 1), sh2JobName, sh2FldrName);
 								/*if (!isJobInScan(srvr, ordrDate, gvnOrdrDate)) {
 									cellJobStatus.setCellValue("NA");
@@ -164,7 +166,7 @@ public class JobTimingsFiller {
 			sh2.autoSizeColumn(9);
 			sh2.autoSizeColumn(10);
 			sh2.autoSizeColumn(11);
-			if (cntr == 0) {
+			if (cntr == 1) {
 				System.out.println("All jobs are present in the Checklist");
 			} else {
 				System.out.println("These jobs are not present in Job Checklist:");

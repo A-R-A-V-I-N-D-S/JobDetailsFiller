@@ -35,6 +35,7 @@ public class JobTimingsFillerTEST {
 			XSSFSheet sh2 = wb.getSheet("Checklist");
 
 			DateFormat timeFormatter = new SimpleDateFormat("hh:mm:ss a");
+			DateFormat ordDateFormat = new SimpleDateFormat("MM-dd-yyyy");
 			String gvnOrdrDate = args;
 			int sh1Len = sh1.getLastRowNum();
 			int sh2Len = sh2.getLastRowNum();
@@ -50,6 +51,7 @@ public class JobTimingsFillerTEST {
 			style.setBorderLeft(BorderStyle.THIN);
 			style.setBorderRight(BorderStyle.THIN);
 			for (int i = 0; i <= sh1Len; i++) {
+//				System.out.println("into the first for loop");
 				String jobStatus = fm.formatCellValue(sh1.getRow(i).getCell(2));
 				int matched = 0;
 				String sh1JobName = fm.formatCellValue(sh1.getRow(i).getCell(1));
@@ -59,6 +61,7 @@ public class JobTimingsFillerTEST {
 				// block which gets order date from the job details
 				if (ordrDtCell != null) {// ignoring NullPointerException
 					if (ordrDtCell.getCellType() != 3) {
+//						System.out.println("into the order date formatter");
 						ordrDate = fm.formatCellValue(ordrDtCell);
 						if (ordrDate.contains("/")) {
 							splitter = "/";
@@ -68,17 +71,18 @@ public class JobTimingsFillerTEST {
 							continue;
 						String[] newOrdrDte = ordrDate.split(splitter);
 						ordrDate = (newOrdrDte[0].length() == 1 ? ("0" + newOrdrDte[0]) : newOrdrDte[0]) + "/"
-								+ (newOrdrDte[1].length() == 1 ? ("0" + newOrdrDte[1]) : newOrdrDte[1]) + "/" + century
+								+ (newOrdrDte[1].length() == 1 ? ("0" + newOrdrDte[1]) : newOrdrDte[1]) + "/"
 								+ newOrdrDte[2];
 					}
 				}
-
+				System.out.println(ordrDate);
 				for (int j = 0; j <= sh2Len; j++) {
 					String sh2JobName = fm.formatCellValue(sh2.getRow(j).getCell(2));
 					String sh2FldrName = fm.formatCellValue(sh2.getRow(j).getCell(3));
 					if (sh1JobName.equals(sh2JobName) && sh1FldrName.equals(sh2FldrName)) {
 						matched = 1;
 						if (ordrDate.equals(gvnOrdrDate)) {
+//							System.out.println("order dates matched");
 							XSSFCell cellStartDateINP = sh1.getRow(i).getCell(14);
 							XSSFCell cellEndDateINP = sh1.getRow(i).getCell(15);
 							String startDate = "";

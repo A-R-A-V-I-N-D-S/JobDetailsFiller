@@ -1,0 +1,4 @@
+Notes:
+	1)The Order date is not properly populating from the Workload manager. If the order date contains "/", it is exactly in the format "MM/dd/yyyy".
+	  But if the order date contains "-", sometimes it is in the format "MM-dd-yyyy" sometimes and "dd-MM-yyyy"
+	2)So, before pasting the CTM Details need to change the cell type from general to text.
