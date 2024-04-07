@@ -7,7 +7,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Scanner;
 import java.util.TimeZone;
 
 import org.apache.poi.ss.usermodel.BorderStyle;
@@ -20,6 +19,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class JobTimingsFiller {
 	App app = new App();
+	ExcelStyle styleClass = new ExcelStyle();
 	String inpFileAddress = app.inpFileAddress;
 	String outFileAddress = app.outFileAddress;
 	static DataFormatter fm = new DataFormatter();
@@ -86,15 +86,15 @@ public class JobTimingsFiller {
 							XSSFCell cellEndDateINP = sh1.getRow(i).getCell(15);
 							String startDate = "";
 							String endDate = "";
-							Cell cellJobStatus = sh2.getRow(j).getCell(11);
+							XSSFCell cellJobStatus = sh2.getRow(j).getCell(11);
 							String sh2JobStatus = fm.formatCellValue(sh2.getRow(j).getCell(11));
 							// condition to map for the only the jobs that are
 							// not
 							// in Ended OK and that are not mapped yet
 							if ((!sh2JobStatus.equalsIgnoreCase("ended ok")) && flag[j] == 0) {
 								flag[j] = 1;
-								Cell cellStDtOUT = sh2.getRow(j).createCell(9);
-								Cell cellEnDtOUT = sh2.getRow(j).createCell(10);
+								XSSFCell cellStDtOUT = sh2.getRow(j).createCell(9);
+								XSSFCell cellEnDtOUT = sh2.getRow(j).createCell(10);
 								cellJobStatus = sh2.getRow(j).createCell(11);
 								if (cellStartDateINP != null) {// ignoringNullPointerException
 									if (cellStartDateINP.getCellType() != 3) {
@@ -150,9 +150,9 @@ public class JobTimingsFiller {
 								 * cellStDtOUT.setCellValue("");
 								 * cellEnDtOUT.setCellValue(""); }
 								 */
-								cellStDtOUT.setCellStyle(style);
-								cellEnDtOUT.setCellStyle(style);
-								cellJobStatus.setCellStyle(style);
+								wXL.styleClass.setBorder(wb, cellStDtOUT);
+								wXL.styleClass.setBorder(wb, cellEnDtOUT);
+								wXL.styleClass.setBorder(wb, cellJobStatus);
 								break;
 							}
 						}
@@ -165,11 +165,11 @@ public class JobTimingsFiller {
 			for (int k = 1; k <= sh2Len; k++) {
 				String jobStatusNA = fm.formatCellValue(sh2.getRow(k).getCell(11));
 				if (flag[k] == 0 && jobStatusNA.equals("")) {
-					sh2.getRow(k).createCell(9).setCellStyle(style);
-					sh2.getRow(k).createCell(10).setCellStyle(style);
-					Cell cellNAjobStatus = sh2.getRow(k).createCell(11);
+					wXL.styleClass.setBorder(wb, sh2.getRow(k).createCell(9));
+					wXL.styleClass.setBorder(wb, sh2.getRow(k).createCell(10));
+					XSSFCell cellNAjobStatus = sh2.getRow(k).createCell(11);
 					cellNAjobStatus.setCellValue("NA");
-					cellNAjobStatus.setCellStyle(style);
+					wXL.styleClass.setBorder(wb, cellNAjobStatus);
 				}
 			}
 			sh2.autoSizeColumn(9);

@@ -2,8 +2,6 @@ package com.checkList;
 
 import java.util.Scanner;
 
-import com.jobChecklistTEST.JobTimingsFillerTEST_bkp;
-
 public class App {
 	String inpFileAddress = "C:\\Users\\AL04040\\OneDrive - Elevance Health\\Documents\\VA_SBE\\temp\\Daily Checklist_IN.xlsx";
 	String outFileAddress = "C:\\Users\\AL04040\\OneDrive - Elevance Health\\Documents\\VA_SBE\\temp\\Daily Checklist_OUT.xlsx";
@@ -16,7 +14,7 @@ public class App {
 		System.out.println("Enter the Order Date that you need to enter timings in format (MM/dd/yyyy):");
 		String gvnOrdrDate = scan.next();
 		System.out.println(gvnOrdrDate);
-		JobTimingsFillerTEST_bkp.main(gvnOrdrDate);
+		JobTimingsFiller.main(gvnOrdrDate);
 		System.out.println("\n***************Completed to fill the job timings***************\n");
 		System.out.println("\n***************Started to validate the job logs***************\n");
 		boolean corectInp = false;
