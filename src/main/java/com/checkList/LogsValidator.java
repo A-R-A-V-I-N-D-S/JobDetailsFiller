@@ -163,7 +163,9 @@ public class LogsValidator implements ActionListener {
 												if (line.contains("ERROR")) {
 													// System.out.println(line);
 													// if condition to limit total characters to 300 per line of error
-													if (line.length() > 300)
+													if(logFileName.equals("SBO_DAILY_CP_LETTER_LOAD_PROD"))
+														maxLen = 196;
+													else if (line.length() > 300)
 														maxLen = 300;
 													else
 														maxLen = line.length();
@@ -245,10 +247,10 @@ public class LogsValidator implements ActionListener {
 		sfd2.setTimeZone(zone);
 		if (sfd2.parse(gvnLogCrtdTime).after(sfd2.parse(shiftStartTime))
 				&& sfd2.parse(gvnLogCrtdTime).before(sfd2.parse(shiftEndTime))) {
-			System.out.println("yes, within time");
+			// System.out.println("yes, within time");
 			return true;
 		} else {
-			System.out.println("not within time");
+			// System.out.println("not within time");
 			return false;
 		}
 	}
