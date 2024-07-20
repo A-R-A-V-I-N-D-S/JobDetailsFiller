@@ -3,9 +3,6 @@ package com.checkList;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,7 +14,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.TimeZone;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -29,10 +25,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
@@ -40,7 +32,6 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
 public class LogsValidator implements ActionListener {
-
 	JFrame frame;
 	JPanel panel;
 	JFormattedTextField field1;
@@ -49,7 +40,7 @@ public class LogsValidator implements ActionListener {
 	String userName;
 	char[] passwordEntered;
 	JButton button;
-	String host[] = { "dc04plvbuc300", "dc04plvbuc301" };
+	String host[] = { "dc04plvbuc300", "dc04plvbuc301", "va10puvbas002" };
 	int port = 22;
 	String shift;
 	String shiftStartTime, shiftEndTime;
@@ -58,10 +49,11 @@ public class LogsValidator implements ActionListener {
 	JobNameIdentifier jobIdnt = new JobNameIdentifier();
 	Map<String, String> logNmFndr = jobIdnt.jobAndLogNameFinder();
 	boolean isCompleted = false;
-	
+
 	App app = new App();
 	ExcelWriter xl = new ExcelWriter();
-	
+	SalesEventsFileChecker slsEvntChk = new SalesEventsFileChecker();
+
 	public void planWindow() {
 		frame = new JFrame("Enter the password");
 		panel = new JPanel(null);
@@ -111,88 +103,32 @@ public class LogsValidator implements ActionListener {
 				Channel channel = session.openChannel("sftp");
 				channel.connect();
 				ChannelSftp sftp = (ChannelSftp) channel;
-				sftp.cd(batchFldrPath);
-				System.out.println("Currently in location - " + sftp.pwd());
-				// to get all the folder names
-				Vector<LsEntry> fldrsList = sftp.ls(batchFldrPath);
 				ArrayList<String> logDates = findLogDate(shift);
-				for (LsEntry j : fldrsList) {
-					String folderName = j.toString().substring(60);
-					if (Pattern.matches("[a-zA-z]+", folderName)) {
-						System.out.println("Checking the folder - " + folderName);
-						String crntFldrPath = batchFldrPath + folderName + "/logs/";
-						try {
-							sftp.cd(crntFldrPath);
-							System.out.println("Change directory to -->" + sftp.pwd());
-							Vector<LsEntry> logsList = sftp.ls(crntFldrPath);
-							InputStream stream = null;
-							BufferedReader br = null;
-							String logFileName = null, logNameWtimeStamp = null, timeStamp = null;
-							int maxLen;
-							for (int x = 0; x < logDates.size(); x++) {
-								for (LsEntry log : logsList) {
-									ArrayList<String> errorList = null;
-									logNameWtimeStamp = log.toString().substring(60);
-									if (logNameWtimeStamp.contains(logDates.get(x).toString())) {
-										timeStamp = logNameWtimeStamp.substring(
-												logNameWtimeStamp.indexOf(shiftStartTime.substring(0, 4)),
-												logNameWtimeStamp.indexOf("."));
-										if (isLogCretdInGivnShift(timeStamp)) {
-											logFileName = logNameWtimeStamp.substring(0,
-													logNameWtimeStamp.indexOf(timeStamp));
-											if (logFileName.contains("_")) {
-												logFileName = logFileName.substring(0, logFileName.length() - 1);
-											}
-											System.out.println(log.toString());
-											stream = sftp.get(crntFldrPath + logNameWtimeStamp);
-											br = new BufferedReader(new InputStreamReader(stream));
-											errorLogFile.write("-------------Checking Logs for - " + logFileName
-													+ "-------------\n");
-											boolean isErrExist = false;
-											String line;
-											String errorLine;
-											if(logNmFndr.containsKey(logFileName))
-												logFileName = logNmFndr.get(logFileName);
-											if (logMapper.containsKey(logFileName))
-												errorList = logMapper.get(logFileName);
-											else
-												errorList = new ArrayList<>();
-												logMapper.put(logFileName, errorList);
-											
-											while ((line = br.readLine()) != null) {
-												if (line.contains("ERROR")) {
-													// System.out.println(line);
-													// if condition to limit total characters to 300 per line of error
-													if(logFileName.equals("SBO_DAILY_CP_LETTER_LOAD_PROD"))
-														maxLen = 196;
-													else if (line.length() > 300)
-														maxLen = 300;
-													else
-														maxLen = line.length();
-													errorLine = line.substring(line.indexOf("ERROR"), maxLen);
-													if (!errorList.contains(errorLine)) {
-														errorList.add(errorLine);
-														logMapper.put(logFileName, errorList);
-													}
-													errorLogFile.write(errorLine + "\n");
-													isErrExist = true;
-												}
-											}
-											if (!isErrExist)
-												errorLogFile.write("No errors present");
-											errorLogFile.write("\n");
-											stream.close();
-										}
-									}
-								}
-							}
-						} catch (Exception exc) {
-							if (exc.getMessage().contains("No such file")) {
-								System.out.println("**No log folder found inside this folder**");
-								continue;
-							}
+				int logNameStartIndexNum;
+				if (!host[i].equalsIgnoreCase("va10puvbas002")) {
+					sftp.cd(batchFldrPath);
+					System.out.println("Currently in location - " + sftp.pwd());
+					logNameStartIndexNum = 60;
+					// to get all the folder names
+					Vector<LsEntry> fldrsList = sftp.ls(batchFldrPath);
+					// should get the folders list from the Map
+					for (LsEntry j : fldrsList) {
+						/*
+						 * Trimming the folder name in the 117th line as the received folder name string
+						 * contains all other details like permissions, last updates date etc.
+						 */
+						String folderName = j.toString().substring(60);
+						if (Pattern.matches("[a-zA-z]+", folderName)) {
+							System.out.println("Checking the folder - " + folderName);
+							String crntFldrPath = batchFldrPath + folderName + "/logs/";
+							logChecker(sftp, crntFldrPath, logDates, logMapper, errorLogFile, logNameStartIndexNum);
 						}
 					}
+				} else {
+					logNameStartIndexNum = 56;
+					String[] logLocations = { "/usr/app/blcs/data_process/logs/", "/usr/app/ascs/data_process/logs/" };
+					for (String location : logLocations)
+						logChecker(sftp, location, logDates, logMapper, errorLogFile, logNameStartIndexNum);
 				}
 				sftp.disconnect();
 				channel.disconnect();
@@ -210,9 +146,88 @@ public class LogsValidator implements ActionListener {
 		xl.writeLogs(logMapper);
 		System.out.println("Error logs written in file successfully");
 		System.out.println("***************Completed to fill the job logs***************");
+		System.out.println("***************Sales Event File Checker started***************");
+		slsEvntChk.check002(userName, "va10puvbas002", password);
+		System.out.println("***************Sales Event File Checker ended***************");
 		frame.dispose();
+//		Signature.main(null);
 	}
 
+	public void logChecker(ChannelSftp sftp, String crntFldrPath, ArrayList<String> logDates,
+			Map<String, ArrayList<String>> logMapper, FileWriter errorLogFile, int logNameStartIndexNum) {
+		try {
+			sftp.cd(crntFldrPath);
+			System.out.println("Change directory to -->" + sftp.pwd());
+			Vector<LsEntry> logsList = sftp.ls(crntFldrPath);
+			InputStream stream = null;
+			BufferedReader br = null;
+			String logFileName = null, logNameWtimeStamp = null, timeStamp = null;
+			int maxLen;
+			for (int x = 0; x < logDates.size(); x++) {
+				for (LsEntry log : logsList) {
+					// have to pass the list too
+					ArrayList<String> errorList = null;
+					logNameWtimeStamp = log.toString().substring(logNameStartIndexNum);
+					if (logNameWtimeStamp.contains(logDates.get(x).toString())) {
+						timeStamp = logNameWtimeStamp.substring(
+								logNameWtimeStamp.indexOf(shiftStartTime.substring(0, 4)),
+								logNameWtimeStamp.indexOf("."));
+						System.out.println(log.toString());
+						if (isLogCretdInGivnShift(timeStamp)) {
+							logFileName = logNameWtimeStamp.substring(0, logNameWtimeStamp.indexOf(timeStamp));
+							if (logFileName.contains("_")) {
+								logFileName = logFileName.substring(0, logFileName.length() - 1);
+							}
+							stream = sftp.get(crntFldrPath + logNameWtimeStamp);
+
+							br = new BufferedReader(new InputStreamReader(stream));
+							errorLogFile.write("-------------Checking Logs for - " + logFileName + "-------------\n");
+							errorLogFile.write("-->"+logNameWtimeStamp + "\n");
+							boolean isErrExist = false;
+							String line;
+							String errorLine;
+							if (logNmFndr.containsKey(logFileName))
+								logFileName = logNmFndr.get(logFileName);
+							if (logMapper.containsKey(logFileName))
+								errorList = logMapper.get(logFileName);
+							else
+								errorList = new ArrayList<>();
+							logMapper.put(logFileName, errorList);
+
+							while ((line = br.readLine()) != null) {
+								if (line.contains("ERROR")) {
+									// System.out.println(line);
+									// if condition to limit total characters to 300 per line of error
+									if (logFileName.equals("SBO_DAILY_CP_LETTER_LOAD_PROD"))
+										maxLen = 196;
+									else if (line.length() > 300)
+										maxLen = 300;
+									else
+										maxLen = line.length();
+									errorLine = line.substring(line.indexOf("ERROR"), maxLen);
+									if (!errorList.contains(errorLine)) {
+										errorList.add(errorLine);
+										logMapper.put(logFileName, errorList);
+									}
+									errorLogFile.write(errorLine + "\n");
+									isErrExist = true;
+								}
+							}
+							if (!isErrExist)
+								errorLogFile.write("No errors present");
+							errorLogFile.write("\n");
+							stream.close();
+						}
+					}
+				}
+			}
+		} catch (Exception exc) {
+			if (exc.getMessage().contains("No such file")) {
+				System.out.println("**No log folder found inside this folder**");
+				return;
+			}
+		}
+	}
 
 	public static ArrayList<String> findLogDate(String shift) {
 		Date dateNtime = new Date();
@@ -257,18 +272,13 @@ public class LogsValidator implements ActionListener {
 
 	public static void main(String args) {
 		LogsValidator pt = new LogsValidator();
-		/*Scanner scan = new Scanner(System.in);
-		boolean corectInp = false;
-		System.out.println("Enter the shift you're in: ");
-		while (!corectInp) {
-			pt.shift = scan.next().toUpperCase();
-			if (pt.shift.equals("S1") || pt.shift.equals("S2") || pt.shift.equals("S3")) {
-				corectInp = true;
-				scan.close();
-			} else {
-				System.out.println("Enter a correct input-");
-			}
-		}*/
+		/*
+		 * Scanner scan = new Scanner(System.in); boolean corectInp = false;
+		 * System.out.println("Enter the shift you're in: "); while (!corectInp) {
+		 * pt.shift = scan.next().toUpperCase(); if (pt.shift.equals("S1") ||
+		 * pt.shift.equals("S2") || pt.shift.equals("S3")) { corectInp = true;
+		 * scan.close(); } else { System.out.println("Enter a correct input-"); } }
+		 */
 		pt.shift = args;
 		pt.sdf.setTimeZone(pt.zone);
 		Calendar cal = new GregorianCalendar();
@@ -282,9 +292,11 @@ public class LogsValidator implements ActionListener {
 		case "S2":
 			pt.shiftStartTime = pt.sdf.format(cal.getTime()) + " 04:30";
 			pt.shiftEndTime = pt.sdf.format(cal.getTime()) + " 13:30";
+//			pt.shiftStartTime = "2024-07-14 04:30";
+//			pt.shiftEndTime = "2024-07-14 13:30";
 			break;
 		case "S3":
-			pt.shiftStartTime = pt.sdf.format(cal.getTime()) + " 12:00";
+			pt.shiftStartTime = pt.sdf.format(cal.getTime()) + " 11:55";
 			pt.shiftEndTime = pt.sdf.format(cal.getTime()) + " 21:00";
 			break;
 		default:

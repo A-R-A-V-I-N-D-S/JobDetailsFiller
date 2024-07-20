@@ -7,8 +7,8 @@ public class JobNameIdentifierTEST {
 
 	public Map<String, String> jobAndLogNameFinder() {
 		Map<String, String> jobAndLogName = new HashMap<>();
-		jobAndLogName.put("LandingZone" , "BLCS_PRODUCER_LANDING_ZONE_BATCH_PROD");
-		jobAndLogName.put("autoAppointmentAgentProcess" , "ASCS_DAILY_NIPR_VA_REM_AUTO_APPOINTMENT_REQ_PROCESS_PROD");
+		jobAndLogName.put( "LandingZone" , "BLCS_PRODUCER_LANDING_ZONE_BATCH_PROD");
+		jobAndLogName.put( "autoAppointmentAgentProcess" , "ASCS_DAILY_NIPR_VA_REM_AUTO_APPOINTMENT_REQ_PROCESS_PROD");
 		jobAndLogName.put( "fetchAgentContactInfoProcess" , "ASCS_DAILY_NIPR_PDB_BUMP_CONTACT_INFO_PROCESS_LOAD");
 		jobAndLogName.put( "UnappointedProducerNotification" , "ASCS_DAILY_UNAPPOINTED_NOTIFICATION_PROCESS_LOAD");
 		jobAndLogName.put( "FMOAgentReleaseNotification" , "ASCS_DAILY_FMO_MGA_RELEASE_NOTIFICATION_PROCESS_LOAD");
@@ -45,6 +45,8 @@ public class JobNameIdentifierTEST {
 		jobAndLogName.put( "ReprocessFailedRecordsJob" , "ASCS_DAILY_REPROCESS_FAILED_RECORDS");
 		jobAndLogName.put( "CustomPointHandShakeEmailJob" , "SBO_DAILY_CP_LETTER_LOAD_PROD");
 		jobAndLogName.put( "AgentWelcomeLetterJob" , "ASCS_DAILY_AGENT_SETUP_WELCOM_LETTER_PROCESS_LOAD");
+		jobAndLogName.put( "ProducerEventLoader", "prod_blcs_producer_event_load");
+		jobAndLogName.put( "producerOptInProcess", "blcs_producer_optin_process_batch");
 
 		return jobAndLogName;
 	}

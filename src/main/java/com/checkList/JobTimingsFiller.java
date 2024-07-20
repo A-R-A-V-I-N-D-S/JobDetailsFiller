@@ -175,7 +175,7 @@ public class JobTimingsFiller {
 			sh2.autoSizeColumn(9);
 			sh2.autoSizeColumn(10);
 			sh2.autoSizeColumn(11);
-			if (cntr == 1) {
+			if (cntr == 0) {
 				System.out.println("All jobs are present in the Checklist");
 			} else {
 				System.out.println("These jobs are not present in Job Checklist:");

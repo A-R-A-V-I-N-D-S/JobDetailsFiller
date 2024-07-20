@@ -25,6 +25,7 @@ public class ExcelWriter {
 				String jobName = jobNameCell.getStringCellValue();
 				if (logMapper.containsKey(jobName)) {
 					XSSFCell errorLogCell = checkListSheet.getRow(i).createCell(13);
+					XSSFCell isValidatedCell = checkListSheet.getRow(i).createCell(12);
 					ArrayList<String> errors = logMapper.get(jobName);
 					String allErrors = App.shift + ":";
 					if (errors.size() == 0) {
@@ -36,7 +37,9 @@ public class ExcelWriter {
 						}
 					}
 					errorLogCell.setCellValue(allErrors);
+					isValidatedCell.setCellValue("Y");
 					styleClass.setBorder(wb, errorLogCell);
+					styleClass.setBorder(wb, isValidatedCell);
 				}
 			}
 			FileOutputStream fileOut = new FileOutputStream(app.outFileAddress);

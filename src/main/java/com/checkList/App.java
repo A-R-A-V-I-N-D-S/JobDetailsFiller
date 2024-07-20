@@ -4,11 +4,11 @@ import java.util.Scanner;
 
 public class App {
 	String inpFileAddress = "C:\\Users\\AL04040\\OneDrive - Elevance Health\\Documents\\VA_SBE\\temp\\Daily Checklist_IN.xlsx";
-	String outFileAddress = "C:\\Users\\AL04040\\OneDrive - Elevance Health\\Documents\\VA_SBE\\temp\\Daily Checklist_OUT.xlsx";
+	String outFileAddress = "C:\\Users\\AL04040\\OneDrive - Elevance Health\\Documents\\VA_SBE\\temp\\Checklist.xlsx";
 	String detailedErrorsLoc = "C:\\Users\\AL04040\\OneDrive - Elevance Health\\Documents\\VA_SBE\\temp\\";
 	static String shift = null;
+
 	public static void main(String[] args) throws Exception {
-		// AppTEST app = new AppTEST();
 		Scanner scan = new Scanner(System.in);
 		System.out.println("***************Started to fill the job timings***************\n");
 		System.out.println("Enter the Order Date that you need to enter timings in format (MM/dd/yyyy):");

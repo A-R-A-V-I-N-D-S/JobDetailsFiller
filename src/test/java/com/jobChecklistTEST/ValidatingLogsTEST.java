@@ -3,9 +3,6 @@ package com.jobChecklistTEST;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,7 +14,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.TimeZone;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -29,10 +25,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
@@ -40,7 +32,6 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
 public class ValidatingLogsTEST implements ActionListener {
-
 	JFrame frame;
 	JPanel panel;
 	JFormattedTextField field1;
@@ -49,7 +40,7 @@ public class ValidatingLogsTEST implements ActionListener {
 	String userName;
 	char[] passwordEntered;
 	JButton button;
-	String host[] = { "dc04plvbuc300", "dc04plvbuc301" };
+	String host[] = { "dc04plvbuc300", "dc04plvbuc301", "va10puvbas002" };
 	int port = 22;
 	String shift;
 	String shiftStartTime, shiftEndTime;
@@ -58,10 +49,11 @@ public class ValidatingLogsTEST implements ActionListener {
 	JobNameIdentifierTEST jobIdnt = new JobNameIdentifierTEST();
 	Map<String, String> logNmFndr = jobIdnt.jobAndLogNameFinder();
 	boolean isCompleted = false;
-	
+
 	AppTEST app = new AppTEST();
 	ExcelWriterTEST xl = new ExcelWriterTEST();
-	
+	SalesEventsFileChecker slsEvntChk = new SalesEventsFileChecker();
+
 	public void planWindow() {
 		frame = new JFrame("Enter the password");
 		panel = new JPanel(null);
@@ -116,7 +108,12 @@ public class ValidatingLogsTEST implements ActionListener {
 				// to get all the folder names
 				Vector<LsEntry> fldrsList = sftp.ls(batchFldrPath);
 				ArrayList<String> logDates = findLogDate(shift);
+				// should get the folders list from the Map
 				for (LsEntry j : fldrsList) {
+					/*
+					 * Trimming the folder name in the 117th line as the received folder name string contains all
+					 * other details like permissions, last updates date etc.
+					 */
 					String folderName = j.toString().substring(60);
 					if (Pattern.matches("[a-zA-z]+", folderName)) {
 						System.out.println("Checking the folder - " + folderName);
@@ -151,19 +148,21 @@ public class ValidatingLogsTEST implements ActionListener {
 											boolean isErrExist = false;
 											String line;
 											String errorLine;
-											if(logNmFndr.containsKey(logFileName))
+											if (logNmFndr.containsKey(logFileName))
 												logFileName = logNmFndr.get(logFileName);
 											if (logMapper.containsKey(logFileName))
 												errorList = logMapper.get(logFileName);
 											else
 												errorList = new ArrayList<>();
-												logMapper.put(logFileName, errorList);
-											
+											logMapper.put(logFileName, errorList);
+
 											while ((line = br.readLine()) != null) {
 												if (line.contains("ERROR")) {
 													// System.out.println(line);
 													// if condition to limit total characters to 300 per line of error
-													if (line.length() > 300)
+													if (logFileName.equals("SBO_DAILY_CP_LETTER_LOAD_PROD"))
+														maxLen = 196;
+													else if (line.length() > 300)
 														maxLen = 300;
 													else
 														maxLen = line.length();
@@ -208,9 +207,12 @@ public class ValidatingLogsTEST implements ActionListener {
 		xl.writeLogs(logMapper);
 		System.out.println("Error logs written in file successfully");
 		System.out.println("***************Completed to fill the job logs***************");
+		System.out.println("***************Sales Event File Checker started***************");
+		slsEvntChk.check002(userName, "va10puvbas002", password);
+		System.out.println("***************Sales Event File Checker ended***************");
 		frame.dispose();
+//		Signature.main(null);
 	}
-
 
 	public static ArrayList<String> findLogDate(String shift) {
 		Date dateNtime = new Date();
@@ -245,28 +247,23 @@ public class ValidatingLogsTEST implements ActionListener {
 		sfd2.setTimeZone(zone);
 		if (sfd2.parse(gvnLogCrtdTime).after(sfd2.parse(shiftStartTime))
 				&& sfd2.parse(gvnLogCrtdTime).before(sfd2.parse(shiftEndTime))) {
-			System.out.println("yes, within time");
+			// System.out.println("yes, within time");
 			return true;
 		} else {
-			System.out.println("not within time");
+			// System.out.println("not within time");
 			return false;
 		}
 	}
 
 	public static void main(String args) {
 		ValidatingLogsTEST pt = new ValidatingLogsTEST();
-		/*Scanner scan = new Scanner(System.in);
-		boolean corectInp = false;
-		System.out.println("Enter the shift you're in: ");
-		while (!corectInp) {
-			pt.shift = scan.next().toUpperCase();
-			if (pt.shift.equals("S1") || pt.shift.equals("S2") || pt.shift.equals("S3")) {
-				corectInp = true;
-				scan.close();
-			} else {
-				System.out.println("Enter a correct input-");
-			}
-		}*/
+		/*
+		 * Scanner scan = new Scanner(System.in); boolean corectInp = false;
+		 * System.out.println("Enter the shift you're in: "); while (!corectInp) {
+		 * pt.shift = scan.next().toUpperCase(); if (pt.shift.equals("S1") ||
+		 * pt.shift.equals("S2") || pt.shift.equals("S3")) { corectInp = true;
+		 * scan.close(); } else { System.out.println("Enter a correct input-"); } }
+		 */
 		pt.shift = args;
 		pt.sdf.setTimeZone(pt.zone);
 		Calendar cal = new GregorianCalendar();
@@ -282,7 +279,7 @@ public class ValidatingLogsTEST implements ActionListener {
 			pt.shiftEndTime = pt.sdf.format(cal.getTime()) + " 13:30";
 			break;
 		case "S3":
-			pt.shiftStartTime = pt.sdf.format(cal.getTime()) + " 12:00";
+			pt.shiftStartTime = pt.sdf.format(cal.getTime()) + " 11:55";
 			pt.shiftEndTime = pt.sdf.format(cal.getTime()) + " 21:00";
 			break;
 		default:
