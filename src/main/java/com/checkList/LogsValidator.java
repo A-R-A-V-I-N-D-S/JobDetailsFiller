@@ -285,19 +285,17 @@ public class LogsValidator implements ActionListener {
 		cal.setTimeZone(pt.zone);
 		switch (pt.shift) {
 		case "S1":
-			pt.shiftEndTime = pt.sdf.format(cal.getTime()) + " 05:30";
+			pt.shiftEndTime = pt.sdf.format(cal.getTime()) + " 05:40";
 			cal.add(Calendar.DATE, -1);
-			pt.shiftStartTime = pt.sdf.format(cal.getTime()) + " 20:30";
+			pt.shiftStartTime = pt.sdf.format(cal.getTime()) + " 20:20";
 			break;
 		case "S2":
-			pt.shiftStartTime = pt.sdf.format(cal.getTime()) + " 04:30";
-			pt.shiftEndTime = pt.sdf.format(cal.getTime()) + " 13:30";
-//			pt.shiftStartTime = "2024-07-14 04:30";
-//			pt.shiftEndTime = "2024-07-14 13:30";
+			pt.shiftStartTime = pt.sdf.format(cal.getTime()) + " 04:20";
+			pt.shiftEndTime = pt.sdf.format(cal.getTime()) + " 13:40";
 			break;
 		case "S3":
-			pt.shiftStartTime = pt.sdf.format(cal.getTime()) + " 11:55";
-			pt.shiftEndTime = pt.sdf.format(cal.getTime()) + " 21:00";
+			pt.shiftStartTime = pt.sdf.format(cal.getTime()) + " 11:50";
+			pt.shiftEndTime = pt.sdf.format(cal.getTime()) + " 21:10";
 			break;
 		default:
 			break;
